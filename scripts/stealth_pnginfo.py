@@ -89,6 +89,7 @@ def read_info_from_image_stealth(image):
     reading_param_len = False
     reading_param = False
     read_end = False
+    never_confirmed = True
     for x in range(width):
         for y in range(height):
             if has_alpha:
@@ -102,6 +103,8 @@ def read_info_from_image_stealth(image):
             buffer_rgb += str(b & 1)
             index_rgb += 3
             if confirming_signature:
+                if x * height + y > 120 and never_confirmed:
+                    return geninfo, items
                 if index_a == len('stealth_pnginfo') * 8:
                     decoded_sig = bytearray(int(buffer_a[i:i + 8], 2) for i in
                                             range(0, len(buffer_a), 8)).decode('utf-8', errors='ignore')
@@ -114,6 +117,7 @@ def read_info_from_image_stealth(image):
                             compressed = True
                         buffer_a = ''
                         index_a = 0
+                        never_confirmed = False
                     else:
                         read_end = True
                         break
@@ -129,6 +133,7 @@ def read_info_from_image_stealth(image):
                             compressed = True
                         buffer_rgb = ''
                         index_rgb = 0
+                        never_confirmed = False
             elif reading_param_len:
                 if mode == 'alpha':
                     if index_a == 32:
